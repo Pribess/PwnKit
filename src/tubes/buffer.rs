@@ -70,6 +70,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn empty_buffer() {
+        let b = Buffer::new();
+        assert!(b.is_empty());
+        assert_eq!(b.len(), 0);
+    }
+
+    #[test]
     fn basic_add_get() {
         let mut b = Buffer::new();
         b.add(b"hello ");
@@ -96,5 +103,87 @@ mod tests {
         let out = b.get_until(b"> ", false).unwrap();
         assert_eq!(out, b"prompt> ");
         assert_eq!(&b.get_all(), b"data");
+    }
+
+    #[test]
+    fn find_not_present() {
+        let mut b = Buffer::new();
+        b.add(b"hello");
+        assert_eq!(b.find(b"xyz"), None);
+    }
+
+    #[test]
+    fn find_empty_needle() {
+        let mut b = Buffer::new();
+        b.add(b"hello");
+        assert_eq!(b.find(b""), None);
+    }
+
+    #[test]
+    fn get_until_not_found() {
+        let mut b = Buffer::new();
+        b.add(b"hello");
+        assert_eq!(b.get_until(b"xyz", true), None);
+        assert_eq!(b.len(), 5);
+    }
+
+    #[test]
+    fn get_zero() {
+        let mut b = Buffer::new();
+        b.add(b"hello");
+        assert_eq!(b.get(0), b"");
+        assert_eq!(b.len(), 5);
+    }
+
+    #[test]
+    fn get_all() {
+        let mut b = Buffer::new();
+        b.add(b"hello");
+        assert_eq!(b.get_all(), b"hello");
+        assert!(b.is_empty());
+    }
+
+    #[test]
+    fn multiple_add() {
+        let mut b = Buffer::new();
+        b.add(b"aaa");
+        b.add(b"bbb");
+        b.add(b"ccc");
+        assert_eq!(b.len(), 9);
+        assert_eq!(b.get_all(), b"aaabbbccc");
+    }
+
+    #[test]
+    fn get_until_multiple_matches() {
+        let mut b = Buffer::new();
+        b.add(b"foo:bar:baz");
+        let out = b.get_until(b":", true).unwrap();
+        assert_eq!(out, b"foo");
+        let out2 = b.get_until(b":", true).unwrap();
+        assert_eq!(out2, b"bar");
+        assert_eq!(b.get_all(), b"baz");
+    }
+
+    #[test]
+    fn get_partial_then_rest() {
+        let mut b = Buffer::new();
+        b.add(b"ABCDEFGH");
+        assert_eq!(b.get(3), b"ABC");
+        assert_eq!(b.get(3), b"DEF");
+        assert_eq!(b.get(10), b"GH");
+    }
+
+    #[test]
+    fn find_at_start() {
+        let mut b = Buffer::new();
+        b.add(b"hello world");
+        assert_eq!(b.find(b"hello"), Some(0));
+    }
+
+    #[test]
+    fn find_at_end() {
+        let mut b = Buffer::new();
+        b.add(b"hello world");
+        assert_eq!(b.find(b"world"), Some(6));
     }
 }

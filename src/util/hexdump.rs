@@ -52,6 +52,41 @@ mod tests {
     use super::*;
 
     #[test]
+    fn empty_data() {
+        assert_eq!(hexdump(b""), "");
+    }
+
+    #[test]
+    fn single_byte() {
+        let dump = hexdump(&[0x41]);
+        assert!(dump.contains("00000000"));
+        assert!(dump.contains("41"));
+        assert!(dump.contains("|A|"));
+    }
+
+    #[test]
+    fn full_16_bytes() {
+        let data: Vec<u8> = (0x40..0x50).collect();
+        let dump = hexdump(&data);
+        assert!(dump.contains("40 41 42 43 44 45 46 47"));
+        assert!(dump.contains("48 49 4a 4b 4c 4d 4e 4f"));
+    }
+
+    #[test]
+    fn nonprintable_shows_dot() {
+        let dump = hexdump(&[0x00, 0x01, 0x02, 0x7f]);
+        assert!(dump.contains("|....|"));
+    }
+
+    #[test]
+    fn multiline() {
+        let data = vec![0x41; 32];
+        let dump = hexdump(&data);
+        assert!(dump.contains("00000000"));
+        assert!(dump.contains("00000010"));
+    }
+
+    #[test]
     fn smoke() {
         let dump = hexdump(b"AAAA\x00\x01\x02\x03");
         assert!(dump.contains("41 41 41 41 00 01 02 03"));

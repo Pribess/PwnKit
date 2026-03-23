@@ -79,7 +79,43 @@ fn pad_to<const N: usize>(data: &[u8]) -> [u8; N] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::context::{self, Arch};
+    use crate::context::{self, Arch, Endian};
+
+    #[test]
+    fn p32_le() {
+        context::set_arch(Arch::Amd64);
+        assert_eq!(p32(0xdeadbeef), [0xef, 0xbe, 0xad, 0xde]);
+    }
+
+    #[test]
+    fn p32_be() {
+        context::set_endian(Endian::Big);
+        assert_eq!(p32(0x41424344), *b"ABCD");
+    }
+
+    #[test]
+    fn p16_be() {
+        context::set_endian(Endian::Big);
+        assert_eq!(p16(0x4142), *b"AB");
+    }
+
+    #[test]
+    fn p64_be() {
+        context::set_endian(Endian::Big);
+        assert_eq!(p64(0x4142434445464748), *b"ABCDEFGH");
+    }
+
+    #[test]
+    fn u16_le() {
+        context::set_arch(Arch::Amd64);
+        assert_eq!(u16_(&[0xaa, 0x55]), 0x55aa);
+    }
+
+    #[test]
+    fn u16_be() {
+        context::set_endian(Endian::Big);
+        assert_eq!(u16_(&[0xaa, 0x55]), 0xaa55);
+    }
 
     #[test]
     fn roundtrip_le() {
@@ -90,14 +126,13 @@ mod tests {
 
     #[test]
     fn roundtrip_be() {
-        context::set_arch(Arch::Mips);
+        context::set_endian(Endian::Big);
         assert_eq!(u32_(&p32(0x41424344)), 0x41424344);
     }
 
     #[test]
     fn short_unpack() {
         context::set_arch(Arch::Amd64);
-        // 6-byte leak, zero-padded
         let leak = u64_(&[0x78, 0x56, 0x34, 0x12, 0xab, 0xcd]);
         assert_eq!(leak, 0x0000_cdab_1234_5678);
     }

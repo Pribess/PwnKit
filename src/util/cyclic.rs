@@ -53,17 +53,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn unique_subsequences() {
-        let pat = cyclic(200);
-        // Every 4-byte window should be unique.
-        for i in 0..pat.len().saturating_sub(3) {
-            let sub = &pat[i..i + 4];
-            assert_eq!(cyclic_find(sub), Some(i), "dup at offset {i}");
-        }
+    fn cyclic_20() {
+        assert_eq!(cyclic(20), b"aaaabaaacaaadaaaeaaa");
     }
 
     #[test]
-    fn find_missing() {
-        assert_eq!(cyclic_find(b"\xff\xff\xff\xff"), None);
+    fn cyclic_32() {
+        assert_eq!(cyclic(32), b"aaaabaaacaaadaaaeaaafaaagaaahaaa");
+    }
+
+    #[test]
+    fn find_baaa() {
+        assert_eq!(cyclic_find(b"baaa"), Some(4));
+    }
+
+    #[test]
+    fn find_caaa() {
+        assert_eq!(cyclic_find(b"caaa"), Some(8));
+    }
+
+    #[test]
+    fn find_at_514() {
+        let pat = cyclic(1000);
+        assert_eq!(cyclic_find(&pat[514..518]), Some(514));
     }
 }

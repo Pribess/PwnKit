@@ -28,7 +28,7 @@ impl Arch {
     /// Default byte order for this architecture.
     pub fn endian(self) -> Endian {
         match self {
-            Self::Mips | Self::Mips64 | Self::Ppc | Self::Ppc64 => Endian::Big,
+            Self::Ppc | Self::Ppc64 => Endian::Big,
             _ => Endian::Little,
         }
     }
@@ -179,4 +179,85 @@ pub fn local(f: impl FnOnce(&mut Context)) -> ContextGuard {
         stack.push(fork);
     });
     ContextGuard
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn arch_arm() {
+        set_arch(Arch::Arm);
+        let c = get();
+        assert_eq!(c.arch, Arch::Arm);
+        assert_eq!(c.bits, 32);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_aarch64() {
+        set_arch(Arch::Aarch64);
+        let c = get();
+        assert_eq!(c.bits, 64);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_i386() {
+        set_arch(Arch::I386);
+        let c = get();
+        assert_eq!(c.bits, 32);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_amd64() {
+        set_arch(Arch::Amd64);
+        let c = get();
+        assert_eq!(c.bits, 64);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_mips() {
+        set_arch(Arch::Mips);
+        let c = get();
+        assert_eq!(c.bits, 32);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_mips64() {
+        set_arch(Arch::Mips64);
+        let c = get();
+        assert_eq!(c.bits, 64);
+        assert_eq!(c.endian, Endian::Little);
+    }
+
+    #[test]
+    fn arch_ppc() {
+        set_arch(Arch::Ppc);
+        let c = get();
+        assert_eq!(c.bits, 32);
+        assert_eq!(c.endian, Endian::Big);
+    }
+
+    #[test]
+    fn arch_ppc64() {
+        set_arch(Arch::Ppc64);
+        let c = get();
+        assert_eq!(c.bits, 64);
+        assert_eq!(c.endian, Endian::Big);
+    }
+
+    #[test]
+    fn scoped_local() {
+        set_arch(Arch::Arm);
+        {
+            let _g = local(|ctx| ctx.set_arch(Arch::I386));
+            assert_eq!(get().arch, Arch::I386);
+            assert_eq!(get().bits, 32);
+        }
+        assert_eq!(get().arch, Arch::Arm);
+    }
 }
