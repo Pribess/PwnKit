@@ -1,0 +1,10 @@
+[package]
+name = "pwnkit"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+description = "CTF exploit development toolkit — pwntools, rewritten in Rust"
+license = "MIT"
+repository = "https://github.com/pribess/pwnkit"
+keywords = ["ctf", "pwn", "exploit", "security", "pwntools"]
+categories = ["command-line-utilities"]
